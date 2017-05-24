@@ -38,22 +38,27 @@ public class MainActivity extends AppCompatActivity {
 
     Button.OnClickListener mClickListener = new View.OnClickListener() {
         public void onClick(View v) {
+            String str = ((EditText) findViewById(R.id.editText)).getText().toString();
 
-            Cursor cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
-
-            String msgData = "";
-            if (cursor.moveToFirst()) { // must check the result to prevent exception
-                do {
-                    for(int idx=0;idx<cursor.getColumnCount();idx++)
-                    {
-                        msgData += " " + cursor.getColumnName(idx) + ":" + cursor.getString(idx);
-                    }
-                    // use msgData
-                } while (cursor.moveToNext());
-            } else {
-                // empty box, no SMS
+            try {
+                OutputStreamWriter outputStreamWriter = new FileWriter(new File("/sdcard/tmp.txt"));
+                outputStreamWriter.write(str);
+                outputStreamWriter.close();
             }
-            ((EditText)findViewById(R.id.editText)).setText(msgData);
+            catch (Exception e) {
+                Log.e("Exception", "File write failed: " + e.toString());
+            }
+
+            NotificationManager mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            Notification.Builder nBuilder = new Notification.Builder(MainActivity.this);
+
+            nBuilder.setContentTitle("IGRUS!");
+            nBuilder.setContentText(str);
+            nBuilder.setSmallIcon(R.mipmap.ic_launcher);
+            nBuilder.setOngoing(false);
+            //nBuilder.setProgress(100, 1, true);
+
+            mNotifyManager.notify(1, nBuilder.build());
         }
     };
 }
